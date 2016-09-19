@@ -21,8 +21,8 @@ docker_build: docker_deps
 
 docker_deploy: docker_build
 	cp -f bin/pidalio-linux-amd64 dockerfiles/deploy/
-	docker build -t cedbossneo/pidalio -f dockerfiles/deploy/Dockerfile dockerfiles/deploy/
-	docker push cedbossneo/pidalio
+	docker build -t cedbossneo/pidalio:cloudwatt -f dockerfiles/deploy/Dockerfile dockerfiles/deploy/
+	docker push cedbossneo/pidalio:cloudwatt
 
 deps:
 	mkdir -p $(GOPATH)/bin
