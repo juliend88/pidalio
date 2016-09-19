@@ -6,7 +6,6 @@ import (
 	"github.com/cedbossneo/pidalio/etcd"
 	"time"
 	"math/big"
-	"fmt"
 	"github.com/cedbossneo/pidalio/utils"
 	"os"
 )
@@ -73,7 +72,7 @@ func CreateRootCertificate(etcd etcd.EtcdClient, token string, key openssl.Priva
 	return certificate
 }
 
-func CreateServerCertificate(rootCerts RootCerts, additionalAltNames []string) ([]byte, []byte, []byte, error) {
+func CreateServerCertificate(rootCerts RootCerts, ip string) ([]byte, []byte, []byte, error) {
 	key, pemPrivateKey, pemPublicKey := GenerateKeypairs(2048)
 	certificate, err := openssl.NewCertificate(&openssl.CertificateInfo{
 		CommonName: "kube-apiserver",
@@ -89,15 +88,7 @@ func CreateServerCertificate(rootCerts RootCerts, additionalAltNames []string) (
 	}
 	certificate.AddExtension(openssl.NID_key_usage, "nonRepudiation,digitalSignature,keyEncipherment")
 	certificate.AddExtension(openssl.NID_basic_constraints, "CA:FALSE")
-	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:kubernetes")
-	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:kubernetes.default")
-	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:kubernetes.default.svc")
-	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:kubernetes.default.svc." + os.Getenv("DOMAIN"))
-	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:10.16.0.1") // Trick
-	certificate.AddExtension(openssl.NID_subject_alt_name, "IP:10.16.0.1")
-	for i := 0; i < len(additionalAltNames); i++ {
-		certificate.AddExtension(openssl.NID_subject_alt_name, "IP:" + additionalAltNames[i])
-	}
+	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:kubernetes, DNS:kubernetes.default, DNS:kubernetes.default.svc, DNS:kubernetes.default.svc." + os.Getenv("DOMAIN") + ", IP:10.16.0.1, IP:"+ip)
 	certificate.SetIssuer(rootCerts.Certificate)
 	certificate.Sign(rootCerts.privateKey, openssl.EVP_SHA256)
 	cert, err := certificate.MarshalPEM()
@@ -148,7 +139,7 @@ func CreateNodeCertificate(rootCerts RootCerts, fqdn string, ip string) ([]byte,
 	}
 	certificate.AddExtension(openssl.NID_key_usage, "nonRepudiation,digitalSignature,keyEncipherment")
 	certificate.AddExtension(openssl.NID_basic_constraints, "CA:FALSE")
-	certificate.AddExtension(openssl.NID_subject_alt_name, fmt.Sprintf("IP:%s", ip))
+	certificate.AddExtension(openssl.NID_subject_alt_name, "IP:" + ip)
 	certificate.SetIssuer(rootCerts.Certificate)
 	certificate.Sign(rootCerts.privateKey, openssl.EVP_SHA256)
 	cert, err := certificate.MarshalPEM()

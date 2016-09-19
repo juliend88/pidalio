@@ -14,6 +14,13 @@ done
 # Root CA
 curl -s ${PIDALIO_URL}/certs/ca\?token\=${PIDALIO_TOKEN} > ca.json
 cat ca.json | jq -r .cert > /etc/kubernetes/ssl/ca.pem
+if [[ "${MASTER}" == "true" ]]
+then
+  # Server Certificate
+  curl -s ${PIDALIO_URL}/certs/server\?token\=${PIDALIO_TOKEN}\&ip=${NODE_PUBLIC_IP} > server.json
+  cat server.json | jq -r .privateKey > /etc/kubernetes/ssl/server-key.pem
+  cat server.json | jq -r .cert > /etc/kubernetes/ssl/server.pem
+fi
 curl -s ${PIDALIO_URL}/certs/node\?token\=${PIDALIO_TOKEN}\&fqdn=${NODE_FQDN}\&ip=${NODE_PUBLIC_IP} > node.json
 cat node.json | jq -r .privateKey > /etc/kubernetes/ssl/node-key.pem
 cat node.json | jq -r .cert > /etc/kubernetes/ssl/node.pem
@@ -36,10 +43,3 @@ contexts:
   name: kubelet-context
 current-context: kubelet-context
 EOF
-if [[ "${MASTER}" == "true" ]]
-then
-  # Server Certificate
-  curl -s ${PIDALIO_URL}/certs/server\?token\=${PIDALIO_TOKEN}\&ip=${NODE_PUBLIC_IP} > server.json
-  cat server.json | jq -r .privateKey > /etc/kubernetes/ssl/server-key.pem
-  cat server.json | jq -r .cert > /etc/kubernetes/ssl/server.pem
-fi
