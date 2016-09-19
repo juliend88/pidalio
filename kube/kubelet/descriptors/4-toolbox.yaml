@@ -166,12 +166,3 @@ items:
             - name: key-storage
               hostPath:
                 path: /home/core/keys
-- path: /etc/environment
-permissions: 0666
-owner: "root:root"
-content: |
-COREOS_PRIVATE_IPV4=$private_ipv4
-COREOS_PUBLIC_IPV4=$public_ipv4
-ETCD_ADDR=$private_ipv4:2379
-ETCD_PEER_ADDR=$private_ipv4:2380
-TOOLBOX_DOMAIN=$domain
