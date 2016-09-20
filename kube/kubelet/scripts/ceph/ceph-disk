@@ -1,3 +1,3 @@
 #!/bin/sh
-export PODNAME=`/opt/bin/kubectl get pods --selector="app=ceph,daemon=mon" --output=template --template="{{with index .items 0}}{{.metadata.name}}{{end}}" --namespace=ceph`
-/opt/bin/kubectl exec -it $PODNAME --namespace=ceph -- ceph-disk "$@"
+export PODNAME=`/opt/bin/kubectl --kubeconfig /home/core/.kube/config get pods --selector="app=ceph,daemon=mon" --output=template --template="{{with index .items 0}}{{.metadata.name}}{{end}}" --namespace=ceph`
+/opt/bin/kubectl --kubeconfig /home/core/.kube/config exec -it $PODNAME --namespace=ceph -- ceph-disk "$@"
