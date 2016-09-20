@@ -22,7 +22,7 @@ then
     --node-ip=${NODE_IP} \
     --config=/etc/kubernetes/manifests \
     --hostname-override=${NODE_PUBLIC_IP} \
-    --cluster-dns=10.32.0.3 \
+    --cluster-dns=10.244.0.3 \
     --cluster-domain=${DOMAIN} \
     --tls-cert-file=/etc/kubernetes/ssl/node.pem \
     --tls-private-key-file=/etc/kubernetes/ssl/node-key.pem \
@@ -65,7 +65,7 @@ EOF
     --node-ip=${NODE_IP} \
     --config=/etc/kubernetes/manifests \
     --hostname-override=${NODE_PUBLIC_IP} \
-    --cluster-dns=10.32.0.3 \
+    --cluster-dns=10.244.0.3 \
     --cluster-domain=${DOMAIN} \
     --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
     --tls-cert-file=/etc/kubernetes/ssl/node.pem \
