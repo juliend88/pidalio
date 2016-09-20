@@ -18,12 +18,13 @@ then
     --register-schedulable=false \
     --register-node=true \
     --allow-privileged=true \
+    --node-ip=${NODE_IP} \
     --config=/etc/kubernetes/manifests \
-    --hostname-override=${NODE_NAME} \
+    --hostname-override=${NODE_PUBLIC_IP} \
     --cluster-dns=10.16.0.3 \
     --cluster-domain=${DOMAIN} \
-    --cloud-provider=openstack \
-    --cloud-config=/etc/kubernetes/cloud.conf \
+    --tls-cert-file=/etc/kubernetes/ssl/node.pem \
+    --tls-private-key-file=/etc/kubernetes/ssl/node-key.pem \
     --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
     @*
 else
@@ -57,14 +58,15 @@ EOF
     --docker-endpoint=unix:///var/run/weave/weave.sock \
     --api-servers=${MASTERS_URLS} \
     --register-node=true \
-    --node-labels=mode=SchedulingDisabled \
+    --node-labels=mode=SchedulingDisabled,type=${NODE_TYPE} \
     --allow-privileged=true \
+    --node-ip=${NODE_IP} \
     --config=/etc/kubernetes/manifests \
-    --hostname-override=${NODE_NAME} \
+    --hostname-override=${NODE_PUBLIC_IP} \
     --cluster-dns=10.16.0.3 \
     --cluster-domain=${DOMAIN} \
-    --cloud-provider=openstack \
-    --cloud-config=/etc/kubernetes/cloud.conf \
     --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+    --tls-cert-file=/etc/kubernetes/ssl/node.pem \
+    --tls-private-key-file=/etc/kubernetes/ssl/node-key.pem \
     @*
 fi
