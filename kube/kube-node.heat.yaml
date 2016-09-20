@@ -276,7 +276,7 @@ resources:
                     Type=oneshot
                     RemainAfterExit=yes
                     TimeoutStartSec=5m
-                    ExecStartPre=/bin/mkdir -p /opt/bin/
+                    ExecStartPre=/bin/mkdir -p /opt/bin/ /opt/cni/bin /etc/cni/net.d
                     ExecStartPre=/usr/bin/curl \
                       --silent \
                       --location \
@@ -287,23 +287,6 @@ resources:
                     [Install]
                     WantedBy=weave-network.target
                     WantedBy=weave.service
-                - name: weaveproxy.service
-                  enable: true
-                  content: |
-                    [Unit]
-                    After=install-weave.service
-                    After=docker.service
-                    Description=Weave proxy for Docker API
-                    Requires=docker.service
-                    Requires=install-weave.service
-                    [Service]
-                    EnvironmentFile=-/etc/weave.env
-                    ExecStartPre=/opt/bin/weave launch-proxy $WEAVEPROXY_ARGS
-                    ExecStart=/usr/bin/docker attach weaveproxy
-                    Restart=on-failure
-                    ExecStop=/opt/bin/weave stop-proxy
-                    [Install]
-                    WantedBy=weave-network.target
                 - name: weave.service
                   enable: true
                   content: |
@@ -317,7 +300,7 @@ resources:
                     [Service]
                     TimeoutStartSec=5m
                     EnvironmentFile=-/etc/weave.env
-                    ExecStartPre=/opt/bin/weave launch-router $WEAVE_PEERS
+                    ExecStartPre=/opt/bin/weave launch $WEAVE_PEERS
                     ExecStart=/usr/bin/docker attach weave
                     Restart=on-failure
                     ExecStop=/opt/bin/weave stop-router
