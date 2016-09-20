@@ -107,11 +107,9 @@ resources:
                   #!/bin/bash
                   NODE_NAME=$(hostname |cut -d '.' -f 1)
                   NODE_FQDN=$(hostname)
-                  NODE_ID=$(curl -s http://169.254.169.254/openstack/latest/meta_data.json | jq -r .uuid)
                   cat <<EOF > /etc/pidalio.env
                   NODE_NAME=$NODE_NAME
                   NODE_FQDN=$NODE_FQDN
-                  NODE_ID=$NODE_ID
                   NODE_IP=$private_ipv4$
                   NODE_PUBLIC_IP=$public_ipv4$
                   NODE_TYPE=cloudwatt
@@ -119,6 +117,7 @@ resources:
                   PEER=$peer$
                   PIDALIO_TOKEN=$token$
                   DOMAIN=$domain$
+                  PATH=/opt/bin/:/usr/bin/:/usr/sbin:$PATH
                   EOF
 
                   if [[ -d /opt/pidalio ]]
