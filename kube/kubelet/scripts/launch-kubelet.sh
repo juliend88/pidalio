@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-export PATH=/opt/bin:$PATH
 if [[ "${MASTER}" == "true" ]]
 then
   (
