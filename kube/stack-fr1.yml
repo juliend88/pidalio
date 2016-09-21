@@ -42,7 +42,7 @@ parameters:
     type: string
 
   flavor:
-    default: s1.cw.small-1
+    default: n1.cw.standard-1
     description: Flavor to use for the deployed instances
     type: string
     label: Instance Type (Flavor)
@@ -104,6 +104,16 @@ resources:
         enable_snat: true
         network: "public"
 
+  vpn_username:
+      type: OS::Heat::RandomString
+      properties:
+        length: 10
+
+  vpn_password:
+      type: OS::Heat::RandomString
+      properties:
+        length: 10
+
   stack_interface:
     type: OS::Neutron::RouterInterface
     properties:
@@ -144,6 +154,8 @@ resources:
           os_region: fr1
           os_tenant_id: { get_param: 'OS::project_id' }
           floating_network: 6ea98324-0f14-49f6-97c0-885d1b8dc517
+          vpn_username: { get_resource: vpn_username }
+          vpn_password: { get_resource: vpn_password }
   scaleup_policy:
     type: OS::Heat::ScalingPolicy
     properties:
@@ -165,3 +177,9 @@ outputs:
     description: >
       his URL is the webhook to scale down the autoscaling group. You can invoke the scale-down operation by doing an HTTP POST to this URL; no body nor extra headers are needed.
     value: {get_attr: [scaledown_policy, alarm_url]}
+  vpn_username:
+    description: VPN Username
+    value: { get_resource: vpn_username }
+  vpn_password:
+    description: VPN Password
+    value: { get_resource: vpn_password }
