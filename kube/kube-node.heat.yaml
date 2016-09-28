@@ -80,6 +80,7 @@ resources:
                   #!/bin/bash
                   echo WEAVE_PEERS=\"$peer$\" > /etc/weave.env
                   echo WEAVEPROXY_ARGS=\"--rewrite-inspect\" >> /etc/weave.env
+                  echo WEAVE_PASSWORD=\"$token$\" >> /etc/weave.env
               - path: /opt/pidalio-init.sh
                 permissions: 0700
                 owner: "root:root"
@@ -104,7 +105,7 @@ resources:
                   then
                     echo "Pidalio already checkout"
                   else
-                    git clone -b cloudwatt https://github.com/juliend88/pidalio.git /opt/pidalio
+                    git clone https://github.com/juliend88/pidalio.git /opt/pidalio
                   fi
                   /opt/pidalio/init.sh
               - path: /opt/pidalio-units.sh
@@ -125,68 +126,6 @@ resources:
                     done
                     sleep 60
                   done
-<<<<<<< HEAD
-              - path: /opt/pidalio.service
-                permissions: 0700
-                owner: "root:root"
-                content: |
-                  [Unit]
-                  Description=Pidalio Service
-                  After=weave-network.target
-                  After=etcd2.service
-                  Requires=weave-network.target
-                  Requires=etcd2.service
-                  [Service]
-                  Restart=always
-                  RestartSec=10
-                  Environment=DOCKER_HOST=unix:///var/run/weave/weave.sock
-                  ExecStartPre=/usr/bin/docker pull cedbossneo/pidalio:cloudwatt
-                  ExecStartPre=/usr/bin/etcdctl cluster-health
-                  ExecStart=/usr/bin/docker run --name=pidalio \
-                    -e TOKEN=$token$ \
-                    -e ETCD_URI=http://$private_ipv4$:2379 \
-                    cedbossneo/pidalio:cloudwatt
-                  ExecStop=/usr/bin/docker rm -f pidalio
-              - path: /opt/pidalio-master@.service
-                permissions: 0700
-                owner: "root:root"
-                content: |
-                  [Unit]
-                  Description=Pidalio Master Service
-                  After=weave-network.target etcd2.service
-                  Requires=weave-network.target etcd2.service
-                  [Service]
-                  Restart=always
-                  RestartSec=10
-                  EnvironmentFile=/etc/pidalio.env
-                  Environment=MASTER=true
-                  ExecStart=/opt/pidalio/start.sh
-                  ExecStop=/opt/pidalio/stop.sh
-                  [X-Fleet]
-                  MachineMetadata=region=$os_region$
-                  Conflicts=pidalio-master@*.service
-                  Conflicts=pidalio-node@*.service
-              - path: /opt/pidalio-node@.service
-                permissions: 0700
-                owner: "root:root"
-                content: |
-                  [Unit]
-                  Description=Pidalio Node Service
-                  After=weave-network.target etcd2.service
-                  Requires=weave-network.target etcd2.service
-                  [Service]
-                  Restart=always
-                  RestartSec=10
-                  EnvironmentFile=/etc/pidalio.env
-                  Environment=MASTER=false
-                  ExecStart=/opt/pidalio/start.sh
-                  ExecStop=/opt/pidalio/stop.sh
-                  [X-Fleet]
-                  MachineMetadata=region=$os_region$
-                  Conflicts=pidalio-master@*.service
-                  Conflicts=pidalio-node@*.service
-=======
->>>>>>> 42853f674d877be201fe2bb41c9874edef489434
             coreos:
               update:
                 reboot-strategy: "off"
@@ -273,8 +212,6 @@ resources:
                     WantedBy=weave-network.target
                     WantedBy=weave.service
                 - name: weave.service
-<<<<<<< HEAD
-=======
                   enable: true
                   content: |
                     [Unit]
@@ -313,7 +250,6 @@ resources:
                     [Install]
                     WantedBy=weave-network.target
                 - name: weaveplugin.service
->>>>>>> 42853f674d877be201fe2bb41c9874edef489434
                   enable: true
                   content: |
                     [Unit]
@@ -326,13 +262,8 @@ resources:
                     [Service]
                     TimeoutStartSec=5m
                     EnvironmentFile=-/etc/weave.env
-<<<<<<< HEAD
-                    ExecStartPre=/opt/bin/weave launch $WEAVE_PEERS
-                    ExecStart=/usr/bin/docker attach weave
-=======
                     ExecStartPre=/opt/bin/weave launch-plugin
                     ExecStart=/usr/bin/docker attach weaveplugin
->>>>>>> 42853f674d877be201fe2bb41c9874edef489434
                     Restart=on-failure
                     ExecStop=/opt/bin/weave stop-plugin
                     [Install]
@@ -348,31 +279,6 @@ resources:
                     RestartSec=10
                     TimeoutStartSec=5m
                     ExecStart=/opt/pidalio-units.sh
-                - name: pptp.service
-                  command: start
-                  content: |
-                    [Unit]
-                    Description=PPTP
-                    After=docker.service
-                    Requires=docker.service
-                    [Service]
-                    TimeoutStartSec=0
-                    Restart=always
-                    RestartSec=10
-                    ExecStartPre=-/usr/bin/docker kill pptp
-                    ExecStartPre=-/usr/bin/docker rm pptp
-                    ExecStartPre=/usr/bin/docker pull cedbossneo/pptp
-                    ExecStart=/bin/bash -c "\
-                      docker run \
-                        --name pptp \
-                        --privileged \
-                        --net=host \
-                        --env 'USERNAME=$vpn_username' \
-                        --env 'PASSWORD=$vpn_password' \
-                        cedbossneo/pptp \
-                    "
-                    ExecStop=/usr/bin/docker stop pptp
-
   floating_ip_link:
     type: OS::Nova::FloatingIPAssociation
     properties:
