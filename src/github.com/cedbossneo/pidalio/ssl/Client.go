@@ -1,7 +1,7 @@
 package ssl
 
 import (
-	"github.com/spacemonkeygo/openssl"
+	"github.com/sgallagher/openssl"
 	"log"
 	"github.com/cedbossneo/pidalio/etcd"
 	"time"
@@ -14,6 +14,12 @@ type RootCerts struct {
 	Certificate *openssl.Certificate
 	privateKey openssl.PrivateKey
 	Token string
+}
+
+type ServerCerts struct {
+	Certificate []byte
+	PrivateKey []byte
+	PublicKey []byte
 }
 
 func GenerateKeypairs(bytes int) (openssl.PrivateKey, []byte, []byte){
@@ -72,7 +78,11 @@ func CreateRootCertificate(etcd etcd.EtcdClient, token string, key openssl.Priva
 	return certificate
 }
 
+<<<<<<< HEAD
 func CreateServerCertificate(rootCerts RootCerts, ip string) ([]byte, []byte, []byte, error) {
+=======
+func CreateServerCertificate(etcd etcd.EtcdClient, token string, rootCerts RootCerts, ip string) ([]byte, []byte, []byte) {
+>>>>>>> 42853f674d877be201fe2bb41c9874edef489434
 	key, pemPrivateKey, pemPublicKey := GenerateKeypairs(2048)
 	certificate, err := openssl.NewCertificate(&openssl.CertificateInfo{
 		CommonName: "kube-apiserver",
@@ -83,20 +93,38 @@ func CreateServerCertificate(rootCerts RootCerts, ip string) ([]byte, []byte, []
 		Serial: big.NewInt(int64(1)),
 	}, key)
 	if err != nil {
-		log.Print("Error while creating Server CA", err)
-		return nil, nil, nil, err
+		log.Fatal("Error while creating Server CA", err)
 	}
+	certificate.SetVersion(openssl.X509_V3)
 	certificate.AddExtension(openssl.NID_key_usage, "nonRepudiation,digitalSignature,keyEncipherment")
 	certificate.AddExtension(openssl.NID_basic_constraints, "CA:FALSE")
+<<<<<<< HEAD
 	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:kubernetes, DNS:kubernetes.default, DNS:kubernetes.default.svc, DNS:kubernetes.default.svc." + os.Getenv("DOMAIN") + ", IP:10.244.0.1, IP:"+ip)
+=======
+	certificate.AddExtension(openssl.NID_subject_alt_name, "DNS:kubernetes, DNS:kubernetes.default, DNS:kubernetes.default.svc, DNS:kubernetes.default.svc." + os.Getenv("DOMAIN") + ", DNS:pidalio-apiserver, DNS:pidalio-apiserver.weave.local, IP:10.244.0.1, IP:"+ip)
+>>>>>>> 42853f674d877be201fe2bb41c9874edef489434
 	certificate.SetIssuer(rootCerts.Certificate)
 	certificate.Sign(rootCerts.privateKey, openssl.EVP_SHA256)
 	cert, err := certificate.MarshalPEM()
 	if err != nil {
-		log.Print("Error while creating Server CA", err)
-		return nil, nil, nil, err
+		log.Fatal("Error while marshalling Server CA", err)
 	}
-	return cert, pemPrivateKey, pemPublicKey, nil
+	encryptedKey, err := utils.Encrypt(token, pemPrivateKey)
+	if err != nil {
+		log.Fatal("Error while encrypting Server Private Key", err)
+	}
+	encryptedPublicKey, err := utils.Encrypt(token, pemPublicKey)
+	if err != nil {
+		log.Fatal("Error while encrypting Server Public Key", err)
+	}
+	encryptedCert, err := utils.Encrypt(token, cert)
+	if err != nil {
+		log.Fatal("Error while encrypting Server CA", err)
+	}
+	etcd.CreateKey("/certs/server/cert", string(encryptedCert))
+	etcd.CreateKey("/certs/server/key", string(encryptedKey))
+	etcd.CreateKey("/certs/server/key.pub", string(encryptedPublicKey))
+	return cert, pemPrivateKey, pemPublicKey
 }
 
 func CreateAdminCertificate(rootCerts RootCerts) ([]byte, []byte, []byte, error) {
@@ -113,6 +141,7 @@ func CreateAdminCertificate(rootCerts RootCerts) ([]byte, []byte, []byte, error)
 		log.Print("Error while creating Admin CA", err)
 		return nil, nil, nil, err
 	}
+	certificate.SetVersion(openssl.X509_V3)
 	certificate.SetIssuer(rootCerts.Certificate)
 	certificate.Sign(rootCerts.privateKey, openssl.EVP_SHA256)
 	cert, err := certificate.MarshalPEM()
@@ -137,6 +166,7 @@ func CreateNodeCertificate(rootCerts RootCerts, fqdn string, ip string) ([]byte,
 		log.Print("Error while creating Node CA", err)
 		return nil, nil, nil, err
 	}
+	certificate.SetVersion(openssl.X509_V3)
 	certificate.AddExtension(openssl.NID_key_usage, "nonRepudiation,digitalSignature,keyEncipherment")
 	certificate.AddExtension(openssl.NID_basic_constraints, "CA:FALSE")
 	certificate.AddExtension(openssl.NID_subject_alt_name, "IP:" + ip)
@@ -150,7 +180,7 @@ func CreateNodeCertificate(rootCerts RootCerts, fqdn string, ip string) ([]byte,
 	return cert, pemPrivateKey, pemPublicKey, nil
 }
 
-func LoadRootCerts(etcd etcd.EtcdClient, token string) RootCerts {
+func loadRootCerts(etcd etcd.EtcdClient, token string) RootCerts {
 	if etcd.KeyExist("/certs/root/key") {
 		rootKey, err := etcd.GetKey("/certs/root/key")
 		if err != nil {
@@ -190,4 +220,51 @@ func LoadRootCerts(etcd etcd.EtcdClient, token string) RootCerts {
 			Token: token,
 		}
 	}
+}
+
+func loadServerCerts(etcd etcd.EtcdClient, token string, rootCerts RootCerts) ServerCerts {
+	if etcd.KeyExist("/certs/server/key") {
+		serverKey, err := etcd.GetKey("/certs/server/key")
+		if err != nil {
+			log.Fatal("Error while loading Server Private Key", err)
+		}
+		decryptedKey, err := utils.Decrypt(token, []byte(serverKey))
+		if err != nil {
+			log.Fatal("Error while decrypting Server Private Key", err)
+		}
+		publicKey, err := etcd.GetKey("/certs/server/key.pub")
+		if err != nil {
+			log.Fatal("Error while loading Server Public Key", err)
+		}
+		decryptedPublicKey, err := utils.Decrypt(token, []byte(publicKey))
+		if err != nil {
+			log.Fatal("Error while decrypting Server Public Key", err)
+		}
+		cert, err := etcd.GetKey("/certs/server/cert")
+		if err != nil {
+			log.Fatal("Error while loading Server Certificate", err)
+		}
+		decryptedCert, err := utils.Decrypt(token, []byte(cert))
+		if err != nil {
+			log.Fatal("Error while decrypting Server Certificate", err)
+		}
+		return ServerCerts{
+			Certificate: decryptedCert,
+			PrivateKey: decryptedKey,
+			PublicKey: decryptedPublicKey,
+		}
+	} else {
+		cert, key, publicKey := CreateServerCertificate(etcd, token, rootCerts, "10.42.1.1")
+		return ServerCerts{
+			Certificate: cert,
+			PrivateKey: key,
+			PublicKey: publicKey,
+		}
+	}
+}
+
+func LoadCerts(etcd etcd.EtcdClient, token string) (RootCerts, ServerCerts) {
+	rootCerts := loadRootCerts(etcd, token)
+	serverCerts := loadServerCerts(etcd, token, rootCerts)
+	return rootCerts, serverCerts
 }

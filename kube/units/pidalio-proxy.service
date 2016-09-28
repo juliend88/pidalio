@@ -1,0 +1,18 @@
+[Unit]
+Description=Pidalio Proxy Service
+After=weave-network.target fleet.service
+Requires=weave-network.target fleet.service
+[Service]
+Restart=always
+RestartSec=10
+EnvironmentFile=/etc/pidalio.env
+Environment=MASTER=false
+ExecStartPre=/opt/pidalio/kube/kubelet/scripts/retrieve-certificates.sh
+ExecStart=/opt/bin/kube-proxy \
+  --master=https://10.42.1.1 \
+  --hostname-override=${NODE_PUBLIC_IP} \
+  --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+  --proxy-mode=iptables
+ExecStop=/usr/bin/pkill kube-proxy
+[X-Fleet]
+Global=True

@@ -1,8 +1,12 @@
-hash: 6b7ae4fdc7aec0b62f384d095fee72f859d390c7b32f2c70310c5270d8abaf35
-updated: 2016-08-18T16:08:07.388420614+02:00
+hash: f4c4dbe28ce10735d21917ae9a035fb9d93910502bd2687dfa3353eb6705f177
+updated: 2016-09-26T14:52:21.244350633+02:00
 imports:
+- name: github.com/cedbossneo/pidalio
+  version: 350d4f512ffbe384e504429ee949c1e3612b536b
+  subpackages:
+  - k8s
 - name: github.com/coreos/etcd
-  version: a20d4a2d31e0a34bd6c07a45931703e6164d2b65
+  version: e2d51961dd4abe6540c7d8e4aac0da7addf2e16e
   subpackages:
   - client
   - pkg/pathutil
@@ -16,12 +20,10 @@ imports:
   version: 2402d76f3d41f928c7902a765dfc872356dd3aad
   subpackages:
   - proto
-- name: github.com/google/gofuzz
-  version: fd52762d25a41827db7ef64c43756fd4b9f7e382
 - name: github.com/manucorporat/sse
   version: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
-- name: github.com/pkg/errors
-  version: a22138067af1c4942683050411a841ade67fe1eb
+- name: github.com/sgallagher/openssl
+  version: 50fb77f227a1f611910aba7eb3041fa806e8ae6c
 - name: github.com/spacemonkeygo/openssl
   version: a0b9b65330879b8c85bc7be7ab1608eafe318b5e
   subpackages:
@@ -32,11 +34,6 @@ imports:
   version: f1f1a805ed361a0e078bb537e4ea78cd37dcf065
   subpackages:
   - codec
-- name: github.com/YakLabs/k8s-client
-  version: 3966f2fff1a1516075d3212450719ffd2638ac8b
-  subpackages:
-  - http
-  - intstr
 - name: golang.org/x/net
   version: f315505cf3349909cdf013ea56690da34e96a451
   subpackages:
