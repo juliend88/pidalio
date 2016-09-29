@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-<<<<<<< HEAD
 if [[ "${MASTER}" == "true" ]]
 then
   (
@@ -36,15 +35,11 @@ else
   echo Masters: ${MASTERS_URLS}
   mkdir -p /home/core/.kube
   cat <<EOF > /home/core/.kube/config
-=======
-mkdir -p /home/core/.kube
-cat <<EOF > /home/core/.kube/config
->>>>>>> 42853f674d877be201fe2bb41c9874edef489434
 apiVersion: v1
 clusters:
 - cluster:
     certificate-authority: /etc/kubernetes/ssl/ca.pem
-    server: https://10.42.1.1
+    server: ${MASTER_URL}
   name: local
 contexts:
 - context:
@@ -60,7 +55,6 @@ users:
     client-certificate: /etc/kubernetes/ssl/node.pem
     client-key: /etc/kubernetes/ssl/node-key.pem
 EOF
-<<<<<<< HEAD
   /opt/bin/kubelet \
     --network-plugin=cni \
     --network-plugin-dir=/etc/cni/net.d \
@@ -70,26 +64,11 @@ EOF
     --allow-privileged=true \
     --node-ip=${NODE_IP} \
     --config=/etc/kubernetes/manifests \
-=======
-chown -R core:core /home/core/.kube
-/opt/bin/kubelet \
-    --network-plugin=cni \
-    --network-plugin-dir=/etc/cni/net.d \
-    --api-servers=https://10.42.1.1 \
-    --register-node=true \
-    --node-labels=type=${NODE_TYPE} \
-    --allow-privileged=true \
-    --node-ip=${NODE_IP} \
->>>>>>> 42853f674d877be201fe2bb41c9874edef489434
     --hostname-override=${NODE_PUBLIC_IP} \
     --cluster-dns=10.244.0.3 \
     --cluster-domain=${DOMAIN} \
     --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
     --tls-cert-file=/etc/kubernetes/ssl/node.pem \
-<<<<<<< HEAD
     --tls-private-key-file=/etc/kubernetes/ssl/node-key.pem \
     @*
 fi
-=======
-    --tls-private-key-file=/etc/kubernetes/ssl/node-key.pem
->>>>>>> 42853f674d877be201fe2bb41c9874edef489434
