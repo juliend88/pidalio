@@ -131,7 +131,7 @@ items:
           nodeSelector:
             network: master
           containers:
-            - image: cloudwattfr/toolbox-server:3.0
+            - image: cloudwattfr/toolbox-server:dev
               imagePullPolicy: Always
               command:
                 - /entrypoint.sh
