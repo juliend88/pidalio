@@ -41,7 +41,7 @@ items:
           nodeSelector:
             network: master
           containers:
-            - image: cloudwattfr/toolbox-client:3.0
+            - image: cloudwattfr/toolbox-client:dev
               imagePullPolicy: Always
               name: toolbox-frontend
               ports:
