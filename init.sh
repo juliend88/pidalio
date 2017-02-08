@@ -6,7 +6,7 @@ source /etc/pidalio.env
 if [[ "${CEPH}" == "True" ]]
 then
     /opt/pidalio/kube/kubelet/scripts/ceph/install-ceph-tools.sh
-    docker pull ceph/base
+    docker pull ceph/base:tag-build-master-hammer-ubuntu-16.04
 fi
 docker pull cedbossneo/docker-etcd-rclone:v1
 export DOCKER_HOST=unix:///var/run/weave/weave.sock
