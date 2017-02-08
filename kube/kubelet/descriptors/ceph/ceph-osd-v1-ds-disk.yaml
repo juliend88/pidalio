@@ -64,7 +64,7 @@ spec:
             secretName: ceph-bootstrap-rgw-keyring
       containers:
         - name: osd-pod
-          image: ceph/daemon:latest
+          image: ceph/daemon:tag-build-master-hammer-ubuntu-16.04
           imagePullPolicy: Always
           volumeMounts:
             - name: devices
