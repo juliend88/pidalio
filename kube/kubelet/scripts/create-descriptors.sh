@@ -7,6 +7,8 @@ do
     i=$(expr $i + 1)
 done
 if [[ $i == 5 ]]; then exit 1; fi
+# Initialize Kubernetes Networking
+kubectl apply -f https://git.io/weave-kube-1.6
 # Initialize Kubernetes Addons
 /opt/bin/kubectl --kubeconfig=/home/core/.kube/config create -f /etc/kubernetes/descriptors/dns
 # Initialize Ceph

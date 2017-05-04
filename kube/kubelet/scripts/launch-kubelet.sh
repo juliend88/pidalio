@@ -32,8 +32,6 @@ EOF
 rm -f /etc/resolv.conf
 ln -s /opt/resolv.conf /etc/resolv.conf
 /opt/bin/kubelet \
-    --network-plugin=cni \
-    --network-plugin-dir=/etc/cni/net.d \
     --api-servers=https://pidalio-apiserver \
     --register-node=true \
     --node-labels=type=${NODE_TYPE},storage=${NODE_STORAGE},network=${NODE_NETWORK} \
