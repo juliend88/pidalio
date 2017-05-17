@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 i=0
-until curl -m 5 http://localhost:8080/healthz || [[ $i == 5 ]]
+until curl -m 5 http://pidalio-apiserver:8080/healthz || [[ $i == 5 ]]
 do
     echo "Waiting for master to be ready"
     sleep 10
@@ -18,11 +18,11 @@ then
     if [[ "${CEPH_DISK}" == "True" ]]
     then
         /opt/bin/kubectl --kubeconfig=/home/core/.kube/config --namespace=ceph create \
+        -f /etc/kubernetes/descriptors/ceph/ceph-osd-v1-ds-disk.yaml \
         -f /etc/kubernetes/descriptors/ceph/ceph-mds-v1-dp.yaml \
         -f /etc/kubernetes/descriptors/ceph/ceph-mon-check-v1-dp.yaml \
         -f /etc/kubernetes/descriptors/ceph/ceph-mon-v1-dp.yaml \
         -f /etc/kubernetes/descriptors/ceph/ceph-mon-v1-svc.yaml \
-        -f /etc/kubernetes/descriptors/ceph/ceph-osd-v1-ds-disk.yaml \
         -f /etc/kubernetes/descriptors/ceph/ceph-stats-v1-dp.yaml \
         -f /etc/kubernetes/descriptors/ceph/ceph-stats-v1-svc.yaml
     else
