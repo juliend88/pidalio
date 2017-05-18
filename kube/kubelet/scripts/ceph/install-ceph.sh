@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 mkdir -p /etc/ceph
-TMP=$(mktemp -d)
 FS_ID=$(uuidgen)
-cd $TMP
+cd /etc/ceph
 cp /opt/pidalio/kube/kubelet/scripts/ceph/keys/* .
 for file in $(ls *)
 do
